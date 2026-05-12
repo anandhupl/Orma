@@ -1,0 +1,14 @@
+# Environments
+.env
+__pycache__/
+*.pyc
+
+# Local Extraction Artifacts (Phase 1)
+*.pdf
+*_converted.txt
+processed_corpora/
+
+# Evaluation Artifacts (Phase 4)
+eval_results.csv
+student_responses_for_review.json
+eval_dataset_eng.json

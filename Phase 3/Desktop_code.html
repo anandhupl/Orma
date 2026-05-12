@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Orma AI Tutor - Study Space</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script> 
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-lowest": "#0b0e14",
+                        "surface-container-low": "#191c22",
+                        "surface": "#10131a",
+                        "primary-container": "#00f2ff",
+                        "on-primary-container": "#006a71",
+                        "primary-fixed-dim": "#00dbe7",
+                        "on-surface": "#e1e2eb",
+                        "on-surface-variant": "#b9cacb",
+                        "surface-container-high": "#272a31",
+                        "surface-container-highest": "#32353c",
+                        "surface-variant": "#32353c",
+                        "outline-variant": "#3a494b",
+                        "secondary-container": "#7701d0",
+                        "secondary": "#dcb8ff"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .ghost-border { border: 1px solid rgba(58, 73, 75, 0.2); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .katex, .katex * { color: #00f2ff !important; border-color: #00f2ff !important; background: transparent !important; }
+        .katex { font-size: 1.1em; } 
+        .katex-display { 
+            font-size: 1.2em; 
+            margin: 1rem 0 !important; 
+            overflow-x: auto; 
+            overflow-y: hidden; 
+            max-width: 100%; 
+            padding-bottom: 0.5rem;
+        }
+        #chatWindow p { margin-bottom: 1.1rem !important; line-height: 1.6; }
+        #chatWindow p:last-child { margin-bottom: 0 !important; }
+        hr { border: 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 1.5rem 0; }
+        .typing-dot {
+            animation: bouncePulse 1.2s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.24s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.12s; }
+        @keyframes bouncePulse {
+            0%, 100% { transform: translateY(0); opacity: 0.4; }
+            50% { transform: translateY(-4px); opacity: 1; }
+        }
+        /* Global Dark Scrollbar Overrides */
+        html { scrollbar-color: #32353c transparent; scrollbar-width: thin; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #272a31; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a494b; }
+        /* Nuke Tailwind Forms plugin focus states */
+        textarea:focus, input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            border-color: transparent !important;
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container overflow-hidden h-screen flex flex-col">
+<header class="fixed top-0 w-full z-50 bg-slate-950/60 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-6 h-16">
+    <div class="flex items-center gap-8">
+        <span class="text-2xl font-bold tracking-tighter text-cyan-400 font-['Space_Grotesk']">Orma</span>
+    </div>
+    <div class="flex items-center">
+        <span class="text-[10px] font-label uppercase tracking-[0.2em] text-on-surface-variant mr-3">Medium</span>
+        <div class="flex items-center bg-[#0b0e14] border border-white/10 rounded-lg p-0.5 mr-6 shadow-inner">
+            <button id="lang-eng" onclick="switchLanguage('eng')" class="lang-btn px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-primary-container/20 text-primary-fixed-dim shadow-sm transition-all">ENG</button>
+            <button id="lang-mal" onclick="switchLanguage('mal')" class="lang-btn px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest text-on-surface-variant hover:text-white transition-all">MAL</button>
+        </div>
+        <div class="hidden lg:flex flex-col items-end mr-4">
+            <span class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Current Class</span>
+            <span class="text-sm font-semibold text-primary-fixed-dim">Grade 10 SSLC</span>
+        </div>
+        <div class="relative flex items-center justify-center h-8 w-8 rounded-full bg-surface-container-high overflow-hidden">
+            <span class="material-symbols-outlined text-sm">person</span>
+        </div>
+    </div>
+</header>
+<div class="flex flex-1 pt-16 h-full overflow-hidden">
+    <aside class="hidden md:flex flex-col h-full w-64 border-r border-white/5 bg-[#0b0e14] z-40">
+        <div class="p-4 border-b border-white/5">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="h-8 w-8 rounded-xl bg-secondary-container flex items-center justify-center">
+                    <span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">psychology</span>
+                </div>
+                <div>
+                    <h3 class="font-['Inter'] text-sm font-medium tracking-wide text-on-surface">Chat History</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest">Recent Sessions</p>
+                </div>
+            </div>
+            <button id="newSessionBtn" class="w-full py-2 px-4 rounded-xl bg-primary-container/10 border border-primary-container/20 text-primary-fixed-dim text-xs font-bold hover:bg-primary-container/20 transition-all">
+                + New Session
+            </button>
+        </div>
+        <div id="historyList" class="flex-1 overflow-y-auto px-4 pb-4 space-y-2 mt-4 no-scrollbar"></div>
+    </aside>
+    <main class="flex-1 flex flex-col relative">
+        <div id="subjectContainer" class="sticky top-0 z-30 bg-surface-container-lowest/80 backdrop-blur-md px-6 py-4 flex items-center gap-3 overflow-x-auto no-scrollbar border-b border-white/5"></div>
+        <div id="chatWindow" class="flex-1 overflow-y-auto px-4 md:px-12 py-8 space-y-10 pb-40"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest to-transparent">
+            <div class="max-w-3xl mx-auto relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-primary-container/20 to-secondary-container/20 rounded-[2rem] blur opacity-50 transition duration-1000" id="inputGlow"></div>
+                <div class="relative bg-surface-variant/40 backdrop-blur-2xl rounded-[1.5rem] ghost-border flex items-end p-2 pr-4 shadow-2xl transition-all" id="inputContainer">
+                    <textarea id="chatInput" class="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none no-scrollbar text-on-surface py-3 px-2 resize-none placeholder:text-primary-fixed-dim/70 max-h-32 disabled:opacity-50 transition-all" placeholder="Waking up Orma..." rows="1"></textarea>
+                    <div class="flex items-center gap-1 mb-1">
+                        <button id="sendBtn" class="h-10 w-10 rounded-xl bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-all disabled:opacity-50">
+                            <span id="sendIcon" class="material-symbols-outlined spinner">sync</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center mt-3 text-[10px] text-on-surface-variant/40 uppercase tracking-[0.2em]">ORMA CAN MAKE MISTAKES.</p>
+        </div>
+    </main>
+</div>
+<script>
+    function streamSanitizer(text) {
+        let safe = text;
+        const lastOpenInline = safe.lastIndexOf('\\(');
+        const lastCloseInline = safe.lastIndexOf('\\)');
+        if (lastOpenInline > lastCloseInline) safe = safe.substring(0, lastOpenInline);
+        const lastOpenDisplay = safe.lastIndexOf('\\[');
+        const lastCloseDisplay = safe.lastIndexOf('\\]');
+        if (lastOpenDisplay > lastCloseDisplay) safe = safe.substring(0, lastOpenDisplay);
+        
+        safe = safe.replace(/\$\s+/g, '$').replace(/\s+\$/g, '$');
+        safe = safe.replace(/\\\(/g, '$').replace(/\\\)/g, '$').replace(/\\\[/g, '$$').replace(/\\\]/g, '$$');
+        return safe;
+    }
+    
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+    
+    marked.use(window.markedKatex({ throwOnError: false, nonStandard: true }));
+    
+    const API_BASE = window.location.origin;
+    
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const sendIcon = document.getElementById('sendIcon');
+    const chatWindow = document.getElementById('chatWindow');
+    const inputContainer = document.getElementById('inputContainer');
+    const subjectContainer = document.getElementById('subjectContainer');
+    const historyList = document.getElementById('historyList');
+    const newSessionBtn = document.getElementById('newSessionBtn');
+    
+    const subjectRegistry = {
+        eng: ["Physics", "Chemistry", "English", "Social Science"],
+        mal: ["Chemistry"]
+    };
+    
+    let myGhostId = "session_" + Date.now();
+    let sessions = JSON.parse(localStorage.getItem('orma_sessions')) || {};
+    let currentLanguage = "eng";
+    let currentSubject = "Physics";
+    let activeMemory = [];
+    
+    function renderSubjectTabs() {
+        subjectContainer.innerHTML = '';
+        subjectRegistry[currentLanguage].forEach(subject => {
+            const isActive = subject === currentSubject;
+            const activeClass = "bg-primary-container text-on-primary-container font-bold shadow-[0_0_15px_rgba(0,242,255,0.3)]";
+            const inactiveClass = "border border-outline-variant/30 text-on-surface-variant font-medium hover:bg-white/5";
+            const safeId = "btn-" + subject.replace(/\s+/g, '-');
+            subjectContainer.insertAdjacentHTML('beforeend', `
+                <button id="${safeId}" onclick="switchSubject('${subject}')" 
+                    class="subject-btn whitespace-nowrap px-4 py-1.5 rounded-full text-xs transition-all ${isActive ? activeClass : inactiveClass}">
+                    ${subject}
+                </button>
+            `);
+        });
+    }
+    
+    function switchLanguage(lang) {
+        if (currentLanguage === lang) return;
+        currentLanguage = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.className = btn.id === 'lang-' + lang 
+                ? "lang-btn px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-primary-container/20 text-primary-fixed-dim shadow-sm transition-all" 
+                : "lang-btn px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest text-on-surface-variant hover:text-white transition-all";
+        });
+        if (!subjectRegistry[currentLanguage].includes(currentSubject)) {
+            currentSubject = subjectRegistry[currentLanguage][0];
+        }
+        resetChatState();
+    }
+    
+    function switchSubject(newSubject) {
+        if (currentSubject === newSubject) return; 
+        currentSubject = newSubject;
+        resetChatState();
+    }
+    
+    function resetChatState() {
+        if (chatWindow.children.length > 0) saveCurrentSession(); 
+        myGhostId = "session_" + Date.now();
+        chatWindow.innerHTML = '';
+        activeMemory = [];
+        renderHistory(true);
+        renderSubjectTabs();
+        setInputState(true);
+    }
+    
+    let saveTimeout;
+    function saveCurrentSession() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            if (activeMemory.length === 0) return; 
+            const titleText = activeMemory[0].user.substring(0, 25) + "...";
+            sessions[myGhostId] = {
+                title: titleText,
+                subject: currentSubject,
+                language: currentLanguage,
+                memory: activeMemory 
+            };
+            localStorage.setItem('orma_sessions', JSON.stringify(sessions));
+        }, 1000);
+    }
+    
+    function renderHistory(force = false) {
+        if (force || historyList.children.length !== Object.keys(sessions).length) {
+            historyList.innerHTML = '';
+            Object.keys(sessions).sort((a, b) => b.localeCompare(a)).forEach(id => {
+                const data = sessions[id];
+                const isActive = id === myGhostId;
+                const activeClasses = "bg-primary-container/10 border-primary-container/40 shadow-[0_0_15px_rgba(0,242,255,0.1)]";
+                const inactiveClasses = "bg-white/5 border-transparent hover:border-outline-variant/50";
+                const iconColor = isActive ? "text-primary-fixed-dim" : "text-on-surface-variant";
+                historyList.insertAdjacentHTML('beforeend', `
+                    <button onclick="loadSession('${id}')" class="w-full text-left p-3 rounded-xl border transition-all group flex items-center gap-3 ${isActive ? activeClasses : inactiveClasses}">
+                        <span class="material-symbols-outlined text-sm ${iconColor} transition-colors" style="font-variation-settings: 'FILL' ${isActive ? 1 : 0};">chat_bubble</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium ${isActive ? 'text-white' : 'text-on-surface'} truncate">${escapeHtml(data.title)}</p>
+                            <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">${data.subject}</p>
+                        </div>
+                    </button>
+                `);
+            });
+        }
+    }
+    
+    function appendMessageToUI(role, text, id = null) {
+        if (role === 'user') {
+            chatWindow.insertAdjacentHTML('beforeend', `
+                <div class="flex justify-end">
+                    <div class="max-w-xl bg-surface-container-highest px-5 py-4 rounded-2xl rounded-tr-none ghost-border shadow-lg">
+                        <p class="text-on-surface leading-relaxed">${escapeHtml(text)}</p>
+                    </div>
+                </div>`);
+        } else {
+            const msgId = id || "msg-" + Date.now();
+            chatWindow.insertAdjacentHTML('beforeend', `
+                <div class="flex items-start gap-4">
+                    <div class="h-10 w-10 shrink-0 rounded-full bg-primary-container/20 flex items-center justify-center border border-primary-container/30 shadow-[0_0_10px_rgba(0,242,255,0.2)]">
+                        <span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">psychology</span>
+                    </div>
+                    <div class="max-w-2xl">
+                        <div class="bg-surface-container-low px-5 py-4 rounded-3xl rounded-tl-none border border-outline-variant/10 shadow-xl inline-block">
+                            <div id="${msgId}" class="body-lg text-on-surface-variant leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>`);
+            
+            if(text) {
+                document.getElementById(msgId).innerHTML = DOMPurify.sanitize(marked.parse(streamSanitizer(text)));
+            } else {
+                document.getElementById(msgId).innerHTML = `
+                    <div class="flex items-center gap-1.5 py-1.5 h-6">
+                        <div class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim typing-dot"></div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim typing-dot"></div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim typing-dot"></div>
+                    </div>
+                `;
+            }
+            return msgId;
+        }
+    }
+
+    window.loadSession = function(id) {
+        saveCurrentSession(); 
+        myGhostId = id;
+        const data = sessions[id];
+        if (!data) return;
+
+        activeMemory = data.memory || []; 
+        currentLanguage = data.language || "eng";
+        currentSubject = data.subject || "Physics";
+        
+        chatWindow.innerHTML = '';
+        activeMemory.forEach(turn => {
+            appendMessageToUI('user', turn.user);
+            appendMessageToUI('ai', turn.ai);
+        });
+        
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.className = btn.id === 'lang-' + currentLanguage 
+                ? "lang-btn px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-primary-container/20 text-primary-fixed-dim shadow-sm transition-all" 
+                : "lang-btn px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest text-on-surface-variant hover:text-white transition-all";
+        });
+        
+        renderSubjectTabs();
+        setInputState(true);
+        renderHistory(true);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    };
+    
+    newSessionBtn.addEventListener('click', () => {
+        resetChatState();
+    });
+    
+    function setInputState(isReady) {
+        if (isReady) {
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            chatInput.placeholder = `Ask Orma about ${currentSubject}...`;
+            sendBtn.className = "h-10 w-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary-container/20";
+            sendIcon.className = "material-symbols-outlined";
+            sendIcon.innerText = "send";
+            inputContainer.classList.remove("opacity-70");
+        } else {
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+            chatInput.placeholder = `Thinking...`;
+            sendBtn.className = "h-10 w-10 rounded-xl bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-all";
+            sendIcon.className = "material-symbols-outlined spinner";
+            sendIcon.innerText = "sync";
+            inputContainer.classList.add("opacity-70");
+        }
+    }
+    
+    window.onload = () => { 
+        renderHistory(); 
+        renderSubjectTabs(); 
+        setInputState(true); 
+    };
+    
+    // Auto-expand textarea as user types
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto'; // Reset height to properly calculate shrinkage
+        this.style.height = this.scrollHeight + 'px'; // Expand to fit new content
+    });
+
+    chatInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if(!sendBtn.disabled) sendBtn.click();
+        }
+    });
+    
+    sendBtn.addEventListener('click', async () => {
+        const userText = chatInput.value.trim();
+        if (!userText) return;
+        
+        chatInput.value = '';
+        chatInput.style.height = 'auto'; // ADD THIS LINE: Reset UI height after sending
+        
+        // ... rest of your code
+        appendMessageToUI('user', userText);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        
+        const msgId = appendMessageToUI('ai', '');
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        
+        setInputState(false);
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000); 
+
+            const response = await fetch(`${API_BASE}/ask-orma`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "X-Session-ID": myGhostId // CRITICAL FIX: Sends session ID to bypass NAT rate-limits
+                },
+                body: JSON.stringify({ 
+                    session_id: myGhostId, 
+                    subject: currentSubject, 
+                    language: currentLanguage, 
+                    message: userText,
+                    history: activeMemory 
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            const msgElement = document.getElementById(msgId);
+
+            if (response.status === 429) {
+                msgElement.innerHTML = '<span class="text-yellow-400">⚠️ Slow down! You\'ve reached the 30 messages/minute limit. Wait a moment and try again.</span>';
+                throw new Error("Rate limited");
+            }
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({ detail: "Unknown network error." }));
+                msgElement.innerHTML = `<span class="text-red-400">Server Error: ${errData.detail}</span>`;
+                throw new Error("Backend returned non-200 status.");
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let fullText = "";
+            let renderTimer;
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break; 
+                fullText += decoder.decode(value, { stream: true });
+                
+                clearTimeout(renderTimer);
+                renderTimer = setTimeout(() => {
+                    msgElement.innerHTML = DOMPurify.sanitize(marked.parse(streamSanitizer(fullText)));
+                    requestAnimationFrame(() => chatWindow.scrollTop = chatWindow.scrollHeight);
+                }, 200); 
+            }
+            msgElement.innerHTML = DOMPurify.sanitize(marked.parse(streamSanitizer(fullText)));
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            
+            activeMemory.push({ user: userText, ai: fullText });
+            if (activeMemory.length > 5) activeMemory.shift(); 
+            
+        } catch (error) {
+            console.error("Connection failed:", error);
+            const msgElement = document.getElementById(msgId);
+            if (!msgElement.innerHTML.includes("Server Error") && !msgElement.innerHTML.includes("Slow down")) {
+                msgElement.innerHTML = '<span class="text-red-400">Error: Connection failed or timed out. Check your network.</span>';
+            }
+        } finally {
+            setInputState(true);
+            saveCurrentSession(); 
+            if (activeMemory.length <= 1) {
+                renderHistory(true); 
+            }     
+        }
+    });
+</script>
+</body>
+</html>
