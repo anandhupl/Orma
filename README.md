@@ -2,6 +2,21 @@
 
 Orma is a Retrieval-Augmented Generation (RAG) AI application engineered specifically to serve as a tutor for Kerala SSLC students. The system architecture utilizes Supabase for vector storage and Gemini 2.5 Flash-Lite for inference, deployed as a monolithic FastAPI application designed for serverless environments like Hugging Face Spaces.
 
+## Interface Overview
+
+<table>
+  <tr>
+    <td valign="top" width="70%">
+      <b>Desktop Interface</b><br>
+      <img src="assets/desktop-ui.png" alt="Orma Desktop UI">
+    </td>
+    <td valign="top" width="30%">
+      <b>Mobile Interface</b><br>
+      <img src="assets/mobile-ui.png" alt="Orma Mobile UI">
+    </td>
+  </tr>
+</table>
+
 ## System Architecture
 
 The project is segmented into four operational phases:
