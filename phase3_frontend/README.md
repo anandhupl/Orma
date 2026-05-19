@@ -6,8 +6,8 @@ This subsystem provides the user-facing interface for the Orma application. It i
 
 ### 1. Dual-Interface Delivery
 The frontend architecture relies on structural segregation rather than CSS media queries for primary layout shifts.
-* **`Desktop_code.html`**: Implements a persistent left-hand sidebar for session history and a central chat pane.
-* **`Mobile_code.html`**: Implements a CSS-transitioned off-canvas side drawer (`toggleDrawer()`) to maximize viewport real estate on constrained devices.
+* **[Desktop_code.html](./Desktop_code.html)**: Implements a persistent left-hand sidebar for session history and a central chat pane.
+* **[Mobile_code.html](./Mobile_code.html)**: Implements a CSS-transitioned off-canvas side drawer (`toggleDrawer()`) to maximize viewport real estate on constrained devices.
 
 ### 2. Core Dependencies (CDN-Delivered)
 * **Styling:** Tailwind CSS (loaded via CDN with container-queries and forms plugins). Injects a custom Material Design 3 (MD3) dark mode color palette configuration.
