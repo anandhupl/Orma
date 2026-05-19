@@ -6,7 +6,7 @@ This subsystem governs the quality assurance and performance benchmarking of the
 
 ## Architecture & Workflows
 
-### 1. Automated Ragas Evaluation (`run_evaluation.py`)
+### 1. [Automated Ragas Evaluation](./run_evaluation.py)
 Executes a fully automated, quantitative evaluation using the Ragas framework by directly executing Google GenAI SDK calls.
 
 * **Student Model:** Gemini 2.5 Flash-Lite. It replicates the system prompt formatting constraints defined in the Phase 2 backend, injecting context directly from a local `eval_dataset_eng.json` file.
@@ -17,11 +17,11 @@ Executes a fully automated, quantitative evaluation using the Ragas framework by
   * **Answer Relevancy:** Measures how directly the generated answer addresses the original query.
 * **Artifact Output:** Generates `eval_results.csv` containing question, ground truth, retrieved context, student answer, and the calculated metric scores.
 
-### 2. Manual Review Generation (`Collect_data_to_run_evaluation.py`)
-A pipeline designed specifically to generate responses for human-in-the-loop (HITL) or external Web UI inspection.
+### 2. [Manual Review Generation (Accessible Track)](./generate_responses_for_review.py)
+A lightweight pipeline designed for Human-In-The-Loop (HITL) manual inspection and for developers who want to test the system without configuring Modal infrastructure.
 
-* **Execution:** Iterates over the static `eval_dataset_eng.json` dataset, executing direct SDK calls to the Gemini API to extract the student responses without running the Modal critic.
-* **Artifact Output:** Dumps a structured JSON file (`student_responses_for_review.json`) formatted for direct ingestion into front-end review tools.
+* **Execution:** Iterates over the static `eval_dataset_eng.json` dataset, executing direct SDK calls to the Gemini API to generate student responses. **This bypasses the GLM 5.1 critic, meaning it only requires a Gemini API key to run.**
+* **Artifact Output:** Dumps a structured JSON file (`student_responses_for_review.json`) that can be read manually or ingested into front-end review tools.
 
 ## Environment & Dependencies
 
