@@ -1,8 +1,10 @@
-# Phase 1: Data Pipeline
+**Phase 1: Data Pipeline**
+
 
 This subsystem is responsible for the ingestion, OCR-based extraction, semantic chunking, and vector embedding of educational PDF materials. It operates strictly on the local file system to generate intermediate text artifacts, which are subsequently ingested directly into a Supabase vector database. Supabase acts as the permanent, exclusive data store for the downstream RAG pipeline.
 
-## Architecture & Workflows
+**Architecture & Workflows**
+
 
 ### 1. [Vision-OCR Extraction](./PDF-to-text-convert.py)
 Converts raw PDF pages into structured Markdown utilizing multimodal LLM processing.
@@ -22,7 +24,8 @@ Parses the intermediate local Markdown artifacts, generates vector embeddings, a
 * **Rate Limiting Mitigation:** Batches are restricted to 20 chunks. A hardcoded 30-second delay (`time.sleep(30)`) is enforced between network calls to strictly adhere to the 30,000 Tokens-Per-Minute (TPM) quota.
 * **Database Synchronization:** Connects to Supabase to execute a clear-and-replace strategy (filtered by `subject` and `language` slugs) before executing bulk inserts of text content, metadata, and embedding vectors.
 
-## Security & Environment Requirements
+**Security & Environment Requirements**
+
 
 Execution requires the following environment variables defined in a local `.env` file. **Hardcoding credentials in the source code is strictly prohibited.**
 

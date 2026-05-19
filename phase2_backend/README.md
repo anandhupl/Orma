@@ -1,15 +1,18 @@
-# Phase 2: Backend Services
+**Phase 2: Backend Services**
+
 
 This subsystem operates as the orchestration layer for the Orma application. Built on FastAPI, it manages client routing, RAG retrieval workflows, rate limiting, and streaming inference using the Gemini 2.5 Flash-Lite model.
 
-## Architecture & Workflows
+**Architecture & Workflows**
+
 
 ### 1. Client Routing & Delivery ([GET /](./api.py))
 The root endpoint acts as a reverse proxy for static frontend assets. 
 * Executes User-Agent string evaluation to detect mobile environments. 
 * Dynamically serves `Mobile_code.html` or `Desktop_code.html`. Returns a 500 Internal Server Error if the target artifact is missing.
 
-### 2. Retrieval-Augmented Generation (RAG) Pipeline
+**2. Retrieval-Augmented Generation (RAG) Pipeline**
+
 The RAG workflow is executed asynchronously within the [get_rag_context_async](./api.py) function.
 
 * **Query Vectorization:** Transforms the incoming user query into a 768-dimensional vector via `gemini-embedding-2-preview`.
@@ -28,7 +31,8 @@ The primary endpoint handling stateful conversation logic and LLM stream generat
 * **Context Management:** Maintains a sliding window of the last 5 turns. Historical strings are aggressively truncated (User: 200 chars, AI: 150 chars) to maintain minimal latency at the cost of long-term semantic continuity.
 * **Streaming Delivery:** Manages Server-Sent Events (SSE) data streams via FastAPI's `StreamingResponse`. Utilizes the `tenacity` library to provide exponential backoff and localized error handling for API connection timeouts or model unavailability.
 
-## Dependencies & Environment
+**Dependencies & Environment**
+
 
 The backend requires the following configuration parameters defined in the Hugging Face Secrets UI or a local `.env` file:
 

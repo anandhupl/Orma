@@ -1,8 +1,10 @@
-# Orma
+**Orma**
+
 
 Orma is a Retrieval-Augmented Generation (RAG) AI application engineered specifically to serve as a tutor for Kerala SSLC students. The system architecture utilizes Supabase for vector storage and Gemini 2.5 Flash-Lite for inference, deployed as a monolithic FastAPI application designed for serverless environments like Hugging Face Spaces.
 
-## Interface Overview
+**Interface Overview**
+
 
 <table>
   <tr>
@@ -17,7 +19,8 @@ Orma is a Retrieval-Augmented Generation (RAG) AI application engineered specifi
   </tr>
 </table>
 
-## System Architecture
+**System Architecture**
+
 
 The project is segmented into four operational phases:
 
@@ -45,6 +48,7 @@ Automated and manual evaluation of RAG retrieval quality and LLM response accura
 * **Execution:** Bypasses the backend API to directly benchmark the Gemini SDK against static local JSON datasets.
 * **Review:** Generates structured JSON artifacts for Human-In-The-Loop (HITL) manual inspection.
 
-## Deployment & Security
+**Deployment & Security**
+
 
 All credentials, API keys, and database URLs **must** be managed via environment variables (`.env` for local development, or the platform-specific Secrets UI in Hugging Face for production). Hardcoding sensitive data in this repository is strictly prohibited.

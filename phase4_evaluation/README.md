@@ -1,10 +1,12 @@
-# Phase 4: Evaluation Framework
+**Phase 4: Evaluation Framework**
+
 
 This subsystem governs the quality assurance and performance benchmarking of the Orma pipeline. It utilizes an LLM-as-a-Judge architecture to quantify hallucination rates and contextual accuracy. 
 
 **Architectural Note:** Currently, this evaluation framework operates in isolation. It benchmarks the inference capability of the model using static, pre-compiled datasets. It does *not* execute End-to-End (E2E) testing against the live FastAPI backend, the local dictionary cache, or the Supabase retrieval pipeline.
 
-## Architecture & Workflows
+**Architecture & Workflows**
+
 
 ### 1. [Automated Ragas Evaluation](./run_evaluation.py)
 Executes a fully automated, quantitative evaluation using the Ragas framework by directly executing Google GenAI SDK calls.
@@ -23,7 +25,8 @@ A lightweight pipeline designed for Human-In-The-Loop (HITL) manual inspection a
 * **Execution:** Iterates over the static `eval_dataset_eng.json` dataset, executing direct SDK calls to the Gemini API to generate student responses. **This bypasses the GLM 5.1 critic, meaning it only requires a Gemini API key to run.**
 * **Artifact Output:** Dumps a structured JSON file (`student_responses_for_review.json`) that can be read manually or ingested into front-end review tools.
 
-## Environment & Dependencies
+**Environment & Dependencies**
+
 
 Execution requires the following configuration parameters inside a `.env` file located in the root directory.
 
