@@ -4,20 +4,20 @@ This subsystem operates as the orchestration layer for the Orma application. Bui
 
 ## Architecture & Workflows
 
-### 1. Client Routing & Delivery (`GET /`)
+### 1. Client Routing & Delivery ([GET /](./api.py))
 The root endpoint acts as a reverse proxy for static frontend assets. 
 * Executes User-Agent string evaluation to detect mobile environments. 
 * Dynamically serves `Mobile_code.html` or `Desktop_code.html`. Returns a 500 Internal Server Error if the target artifact is missing.
 
 ### 2. Retrieval-Augmented Generation (RAG) Pipeline
-The RAG workflow is executed asynchronously within the `get_rag_context_async` function.
+The RAG workflow is executed asynchronously within the [get_rag_context_async](./api.py) function.
 
 * **Query Vectorization:** Transforms the incoming user query into a 768-dimensional vector via `gemini-embedding-2-preview`.
 * **In-Memory Caching:** Implements a localized, dictionary-based LRU-style cache (`_rag_context_cache`, max 200 items) keyed by the hash of `query:subject:language`. This prevents redundant Supabase RPC calls but is isolated per-process in multi-worker environments.
 * **Database Query (REST Execution):** Bypasses the Supabase Python SDK to construct raw HTTP POST requests via `httpx` to the `hybrid_search_v2` RPC. Implements a dynamic `match_count` strategy: strictly limited to 1 for short queries (<5 words) and 2 for longer academic inquiries.
 * **Context Assembly:** Parses the database JSON payload, prepends page metadata, concatenates text blocks, and enforces a hard truncation limit of 3000 characters to optimize context window efficiency.
 
-### 3. Inference Engine (`POST /ask-orma`)
+### 3. Inference Engine ([POST /ask-orma](./api.py))
 The primary endpoint handling stateful conversation logic and LLM stream generation.
 
 * **Rate Limiting:** Employs SlowAPI restricted to 30 requests per minute. Limits are keyed dynamically by a custom HTTP header (`X-Session-ID`) acting as a failover to IP addresses, ensuring functionality behind shared school NAT gateways.
