@@ -4,7 +4,7 @@ This subsystem is responsible for the ingestion, OCR-based extraction, semantic 
 
 ## Architecture & Workflows
 
-### 1. Vision-OCR Extraction (`PDF-to-text-convert.py`)
+### 1. [Vision-OCR Extraction](./PDF-to-text-convert.py)
 Converts raw PDF pages into structured Markdown utilizing multimodal LLM processing.
 
 * **Image Processing:** Uses `PyMuPDF` (`fitz`) to render PDF pages into JPEG format, scaling via a `Matrix(2, 2)` transformation (144 DPI) to ensure legibility of mathematical symbols.
@@ -13,7 +13,7 @@ Converts raw PDF pages into structured Markdown utilizing multimodal LLM process
 * **Concurrency Model:** Executes via `ThreadPoolExecutor` (capped at 5 workers to mitigate API rate limits). Implements exponential backoff using the `tenacity` library to handle network/quota failures.
 * **Storage:** Concatenates and writes the final Markdown corpus to a local `.txt` file. This file is an ephemeral bridge for database ingestion.
 
-### 2. Embedding & Database Ingestion (`Ingest_to_database.py`)
+### 2. [Embedding & Database Ingestion](./Ingest_to_database.py)
 Parses the intermediate local Markdown artifacts, generates vector embeddings, and populates the remote Supabase PostgreSQL instance.
 
 * **Chunking Strategy:** Employs a custom regular expression-based chunker (`smart_chunker`). Splits text at sentence boundaries with a 1500-character limit and a 200-character semantic overlap. Contextual page numbers are tracked via the OCR-injected delimiters.
