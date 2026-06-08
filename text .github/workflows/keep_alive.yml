@@ -1,0 +1,23 @@
+name: Keep ORMA Alive
+on:
+  schedule:
+    # Runs every 6 hours to consistently trick Supabase & HF monitoring
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST Interface
+        run: |
+          curl -s -w "\nSupabase REST Status: %{http_code}\n" \
+          "https://emyvvlfbcqtenuhblopj.supabase.co/rest/v1/textbook_sections_v2?limit=1" \
+          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          
+      - name: Wake Up Hugging Face Space Backend
+        run: |
+          # Explicitly hits your public app instance to keep it warm
+          curl -s -w "\nHugging Face Status: %{http_code}\n" \
+          "https://anandhupl-orma.hf.space"
